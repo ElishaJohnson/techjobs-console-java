@@ -10,6 +10,7 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by LaunchCode
@@ -50,8 +51,11 @@ public class JobData {
 
         // load data, if not already loaded
         loadData();
-
-        return allJobs;
+        ArrayList<HashMap<String, String>> allJobsCopy = new ArrayList<>();
+        for (HashMap<String, String> row : allJobs) {
+            allJobsCopy.add(hashCopy(row));
+        }
+        return fullSort(allJobsCopy);
     }
 
     /**
@@ -76,12 +80,68 @@ public class JobData {
 
             String aValue = row.get(column);
 
-            if (aValue.contains(value)) {
+            if (aValue.toLowerCase().contains(value.toLowerCase())) {
                 jobs.add(row);
             }
         }
 
+        jobs = fullSort(jobs);
+        jobs = sortByKey(jobs, column);
+
         return jobs;
+    }
+
+    public static ArrayList<HashMap<String, String>> findByValue(String value) {
+        // load data, if not already loaded
+        loadData();
+        ArrayList<HashMap<String, String>> jobs = new ArrayList<>();
+        for (HashMap<String, String> row : allJobs) {
+            ArrayList<String> rowEntry = new ArrayList<>(row.keySet());
+            for (String column : rowEntry) {
+               String aValue = row.get(column);
+               if (aValue.toLowerCase().contains(value.toLowerCase()) && !jobs.contains(row)) {
+                   jobs.add(row);
+               }
+            }
+        }
+        return fullSort(jobs);
+    }
+
+    private static ArrayList<HashMap<String, String>> fullSort(ArrayList<HashMap<String, String>> jobs) {
+        jobs = sortByKey(jobs, "name");
+        jobs = sortByKey(jobs, "position type");
+        jobs = sortByKey(jobs, "core competency");
+        jobs = sortByKey(jobs, "employer");
+        jobs = sortByKey(jobs, "location");
+        return jobs;
+    }
+
+    private static ArrayList<HashMap<String, String>> sortByKey(ArrayList<HashMap<String, String>> jobs, String key) {
+        boolean sorted = false;
+        int range = jobs.size() - 1;
+        do {
+            sorted = true;
+            for (int i = 0; i < range; i++) {
+                int comparison = jobs.get(i).get(key).compareToIgnoreCase(jobs.get(i + 1).get(key));
+                if (comparison > 0) {
+                    sorted = false;
+                    HashMap<String, String> temp = hashCopy(jobs.get(i));
+                    jobs.set(i, jobs.get(i + 1));
+                    jobs.set(i + 1, temp);
+                }
+            }
+            range--;
+        } while (!sorted);
+        return jobs;
+    }
+
+    private static HashMap<String, String> hashCopy(HashMap<String, String> mapToCopy) {
+        HashMap<String, String> mapCopy = new HashMap<>();
+        ArrayList<Map.Entry<String, String>> list = new ArrayList(mapToCopy.entrySet());
+        for (Map.Entry<String, String> element : list) {
+            mapCopy.put(element.getKey(), element.getValue());
+        }
+        return mapCopy;
     }
 
     /**
