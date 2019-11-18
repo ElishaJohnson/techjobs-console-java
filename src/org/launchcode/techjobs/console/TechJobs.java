@@ -43,6 +43,7 @@ public class TechJobs {
                 } else {
 
                     ArrayList<String> results = JobData.findAll(columnChoice);
+                    alphabetize(results);
 
                     System.out.println("\n*** All " + columnChoices.get(columnChoice) + " Values ***");
 
@@ -67,6 +68,24 @@ public class TechJobs {
                     printJobs(JobData.findByColumnAndValue(searchField, searchTerm));
                 }
             }
+        }
+    }
+
+    private static void alphabetize(ArrayList<String> stringList) {
+        boolean sorted = false;
+        int range = stringList.size() - 1;
+        while (!sorted) {
+            sorted = true;
+            for (int i = 0; i < range; i++) {
+                int compare = stringList.get(i).compareToIgnoreCase(stringList.get(i + 1));
+                if (compare > 0) {
+                    sorted = false;
+                    String temp = stringList.get(i);
+                    stringList.set(i, stringList.get(i + 1));
+                    stringList.set(i + 1, temp);
+                }
+            }
+            range--;
         }
     }
 
